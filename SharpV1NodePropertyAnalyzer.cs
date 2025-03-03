@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Spectre.Console;
 
 namespace SharpNodeConverterGenerator
 {
@@ -20,6 +21,9 @@ namespace SharpNodeConverterGenerator
 
 		public NodeModel Analyze(string path)
 		{
+			string[] pathSlice = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+			string category = pathSlice[^2];
+			string fileName = Path.GetFileNameWithoutExtension(path);
 			NodeModel model = new();
 			StreamReader sr = new(path);
 			string code = sr.ReadToEnd();
@@ -28,7 +32,12 @@ namespace SharpNodeConverterGenerator
 			var FirstClass = root.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault();
 			if (FirstClass != null)
 			{
-				model.TypeUID = FirstClass.Identifier.ToString();
+				string identifier = FirstClass.Identifier.ToString();
+				if (identifier != fileName)
+				{
+					AnsiConsole.MarkupLine("[orange]File name does not match class name[/]");
+				}
+				model.TypeUID = $".{category}.{fileName}, ";
 				var properties = FirstClass.Members.OfType<PropertyDeclarationSyntax>().ToList();
 				foreach (var property in properties)
 				{
@@ -47,7 +56,7 @@ namespace SharpNodeConverterGenerator
 			return model;
 		}
 
-		public string? AnalyzeProperty(PropertyDeclarationSyntax property)
+		public static string? AnalyzeProperty(PropertyDeclarationSyntax property)
 		{
 			if (property.AccessorList == null)
 				return null;
@@ -83,10 +92,9 @@ namespace SharpNodeConverterGenerator
 							return literal.Token.ValueText;
 						}
 					}
-					return "Name";
 				}
 			}
-			return null;
+			return property.Identifier.ToString();
 		}
 	}
 }
