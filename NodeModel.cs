@@ -11,7 +11,7 @@ namespace SharpNodeConverterGenerator
 	[Serializable]
 	public class NodeModel
 	{
-		[JsonProperty] public string TypeUID = "Unknown Node";
+		[JsonProperty] public string TypeUID = "Unknown";
 		[JsonProperty] public List<NodeProperty> Captures = [];
 	}
 }

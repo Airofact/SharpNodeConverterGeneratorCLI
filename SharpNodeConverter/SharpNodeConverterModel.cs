@@ -19,11 +19,12 @@ namespace SharpNodeConverterGenerator.SharpNodeConverter
 
 		public override NodeModel Convert(NodeModel node)
 		{
+			var newNode = node;
 			foreach (var converter in Converters)
 			{
-				node = converter.Convert(node);
+				newNode = converter.Convert(newNode);
 			}
-			return node;
+			return newNode;
 		}
 	}
 }
